@@ -92,7 +92,9 @@ def merge_files() -> pd.DataFrame:
     merged = pd.concat(valid_data, ignore_index=True)
 
     before_count = len(merged)
-    merged = merged.drop_duplicates()
+    # 来源文件不同，也应把相同的销售记录视为重复数据。
+    dedup_columns = ["日期", "销售员", "产品", "数量", "金额"]
+    merged = merged.drop_duplicates(subset=dedup_columns)
     logging.info("去重完成，删除 %d 行重复数据", before_count - len(merged))
 
     merged["日期"] = pd.to_datetime(merged["日期"], errors="coerce")
