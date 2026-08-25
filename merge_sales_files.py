@@ -43,7 +43,17 @@ def read_one_file(file_path: Path) -> pd.DataFrame | None:
     """读取并检查一个 Excel 或 CSV 文件。"""
     try:
         if file_path.suffix.lower() == ".csv":
-            data = pd.read_csv(file_path)
+            data = None
+            for encoding in ("utf-8", "utf-8-sig", "gbk", "utf-16"):
+                try:
+                    data = pd.read_csv(file_path, encoding=encoding)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            if data is None:
+                raise UnicodeDecodeError(
+                    "csv", b"", 0, 1, "无法识别 CSV 文件编码"
+                )
         elif file_path.suffix.lower() == ".json":
             data = pd.read_json(file_path)
         else:
